@@ -1,18 +1,19 @@
 import { NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
+import { ObjectId } from 'mongodb'
+import { USER_MESSAGES } from '~/constants/messages'
 import { RegisterRequestBody } from '~/models/requests/User.request'
+import User from '~/models/schema/User.schema'
 import userServices from '~/services/user.services'
 
-export const loginController = (req: Request, res: Response) => {
-  const { email, password } = req.body
-  if (email === 'binh123@gmail.com' && password === '123123') {
-    return res.status(200).json({
-      message: 'Login success!'
-    })
-  }
+export const loginController = async (req: Request, res: Response) => {
+  const user = req.user as User
 
-  return res.status(400).json({
-    error: 'Login failed'
+  const user_id = user._id as ObjectId
+  const result = await userServices.Login(user_id.toString())
+  return res.json({
+    message: USER_MESSAGES.LOGIN_SUCCESS,
+    result
   })
 }
 export const registerController = async (
@@ -24,7 +25,7 @@ export const registerController = async (
     const result = await userServices.register(req.body)
 
     return res.json({
-      message: 'Register success!',
+      message: USER_MESSAGES.REGISTER_SUCCESS,
       result
     })
   } catch (error) {

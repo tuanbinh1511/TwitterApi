@@ -1,3 +1,22 @@
 export const USER_MESSAGES = {
-  VALIDATION_ERROR: 'Validation error'
+  VALIDATION_ERROR: 'Validation error !',
+  EMAIL_ALREADY_EXISTS: 'Email đã tồn tại!',
+  NAME_IS_REQUIRED: 'Yêu cầu nhập tên!',
+  NAME_MUST_BE_A_STRING: 'Name must be a string !',
+  NAME_LENGTH: 'Độ dài tên từ 1-50 kí tự !',
+  EMAIL_IS_REQUIRE: 'Email là bắt buộc!',
+  EMAIL_IN_VALID: 'Email không phù hợp!',
+  PASSWORD_IS_REQUIRE: 'Mật khẩu là bắt buộc',
+  Password_MUST_BE_A_STRONG: 'Password must be strong !',
+  PASSWORD_LENGTH: 'Độ dài mật khẩu từ 1-50 kí tự !',
+  PASSWORD_MUST_BE_A_STRING: 'Mật khẩu must be a string !',
+  CONFIRMPASSWORD_MUST_BE_A_STRING: 'Mật khẩu must be a string !',
+  CONFIRMPASSWORD_IS_REQUIRE: 'Mật khẩu là bắt buộc',
+  CONFIRMPASSWORD_MUST_BE_A_STRONG: 'ConfirmPassword must be strong !',
+  CONFIRMPASSWORD_LENGTH: 'Độ dài mật khẩu từ 1-50 kí tự !',
+  CONFIRMPASSWORD_NOTSAME: 'Mật khẩu nhập lại không chính xác!',
+  DATE_OF_BIRTH_NOT_BE_ISO8601: 'Sai định dạng Date of birth!',
+  USER_NOT_FOUND: 'Không tìm thấy người dùng!',
+  LOGIN_SUCCESS: 'Đăng nhập thành công!',
+  REGISTER_SUCCESS: 'Đăng kí tài khoản thành công!'
 } as const
