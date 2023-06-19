@@ -18,5 +18,10 @@ export const USER_MESSAGES = {
   DATE_OF_BIRTH_NOT_BE_ISO8601: 'Sai định dạng Date of birth!',
   USER_NOT_FOUND: 'Không tìm thấy người dùng!',
   LOGIN_SUCCESS: 'Đăng nhập thành công!',
-  REGISTER_SUCCESS: 'Đăng kí tài khoản thành công!'
+  REGISTER_SUCCESS: 'Đăng kí tài khoản thành công!',
+  EMAIL_AND_PASSWORD_INCORRECT: 'Sai tài khoàn hoặc mật khẩu!',
+  ACCESSTOKEN_IS_REQUIRED: 'AccessToken không tồn tại!',
+  REFRESHTOKEN_IS_REQUIRED: 'RefreshToken không tồn tại!',
+  REFRESHTOKEN_INVALID: 'RefreshToken invalid!',
+  USER_REFRESHTOKEN_NOT_EXIST: 'RefreshToken not exist!'
 } as const
