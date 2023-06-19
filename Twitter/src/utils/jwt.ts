@@ -1,6 +1,9 @@
-import { rejects } from 'assert'
-import { error } from 'console'
+import { config } from 'dotenv'
 import jwt, { SignOptions } from 'jsonwebtoken'
+import { reject } from 'lodash'
+import { TokenPayLoad } from '~/models/requests/User.request'
+
+config()
 
 export const signToken = ({
   payload,
@@ -13,12 +16,30 @@ export const signToken = ({
   privateKey?: string
   options?: SignOptions
 }) => {
-  return new Promise<string>((relsove, reject) => {
+  return new Promise<string>((resolve, reject) => {
     jwt.sign(payload, privateKey, options, (error, token) => {
       if (error) {
         throw reject(error)
       }
-      relsove(token as string)
+      resolve(token as string)
+    })
+  })
+}
+
+export const verifyToken = ({
+  token,
+  secretOnPublicKey = process.env.JWT_SECRET as string
+}: {
+  token: string
+  secretOnPublicKey?: string
+}) => {
+  return new Promise<TokenPayLoad>((resolve, reject) => {
+    jwt.verify(token, secretOnPublicKey, (error, decoded) => {
+      if (error) {
+        console.log(error)
+        throw reject(error)
+      }
+      resolve(decoded as TokenPayLoad)
     })
   })
 }
