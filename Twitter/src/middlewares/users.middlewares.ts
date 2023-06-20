@@ -170,7 +170,9 @@ export const accessTokenValidator = validate(
       Authorization: {
         custom: {
           options: async (value: string, { req }) => {
-            const access_token = (value || '').split(' ')[1]
+
+            const access_token = value.split(' ')[1]
+
 
             if (!access_token)
               throw new ErrorWithStatus({
