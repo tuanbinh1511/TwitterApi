@@ -36,7 +36,6 @@ export const verifyToken = ({
   return new Promise<TokenPayLoad>((resolve, reject) => {
     jwt.verify(token, secretOnPublicKey, (error, decoded) => {
       if (error) {
-        console.log(error)
         throw reject(error)
       }
       resolve(decoded as TokenPayLoad)

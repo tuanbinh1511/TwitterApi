@@ -116,7 +116,7 @@ export const registerValidator = validate(
           }
         }
       },
-      confirmPassword: {
+      confirm_password: {
         errorMessage: USER_MESSAGES.CONFIRMPASSWORD_MUST_BE_A_STRONG,
         notEmpty: {
           errorMessage: USER_MESSAGES.CONFIRMPASSWORD_IS_REQUIRE
@@ -170,7 +170,6 @@ export const accessTokenValidator = validate(
         custom: {
           options: async (value: string, { req }) => {
             const access_token = value.split(' ')[1]
-            console.log('access_token', access_token)
 
             if (!access_token)
               throw new ErrorWithStatus({
