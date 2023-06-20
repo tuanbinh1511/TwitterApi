@@ -23,5 +23,10 @@ export const USER_MESSAGES = {
   ACCESSTOKEN_IS_REQUIRED: 'AccessToken không tồn tại!',
   REFRESHTOKEN_IS_REQUIRED: 'RefreshToken không tồn tại!',
   REFRESHTOKEN_INVALID: 'RefreshToken invalid!',
-  USER_REFRESHTOKEN_NOT_EXIST: 'RefreshToken not exist!'
+  USER_REFRESHTOKEN_NOT_EXIST: 'RefreshToken not exist!',
+  LOGOUT_SUCCESS: 'Logout success',
+  EMAIL_VERIFY_TOKEN_IS_REQUIRED: 'Email verify token is required',
+
+  EMAIL_ALREADY_VERIFIED_BEFORE: 'Email already verified before',
+  EMAIL_VERIFY_SUCCESS: 'Email verify success'
 } as const
