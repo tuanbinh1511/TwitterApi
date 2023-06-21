@@ -161,6 +161,23 @@ class UserServices {
       message: 'Check email to forgot password!'
     }
   }
+  async resetPassword(user_id: string, password: string) {
+    databaseServices.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          forgot_password_token: '',
+          password: hashPassword(password)
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+    return {
+      message: 'Reset Password Successfully!'
+    }
+  }
 }
 const userServices = new UserServices()
 export default userServices
