@@ -1,14 +1,23 @@
 import { NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
+import { result } from 'lodash'
 import { ObjectId } from 'mongodb'
+import { UserVerifyStatus } from '~/constants/enums'
 import httpStatus from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
-import { LogoutRequestBody, RegisterRequestBody, TokenPayLoad } from '~/models/requests/User.request'
+import {
+  EmailVerifyTokenRequestBody,
+  ForgotPasswordRequestBody,
+  LoginRequestBody,
+  LogoutRequestBody,
+  RegisterRequestBody,
+  TokenPayLoad
+} from '~/models/requests/User.request'
 import User from '~/models/schema/User.schema'
 import databaseServices from '~/services/database.services'
 import userServices from '~/services/user.services'
 
-export const loginController = async (req: Request, res: Response) => {
+export const loginController = async (req: Request<ParamsDictionary, any, LoginRequestBody>, res: Response) => {
   const user = req.user as User
 
   const user_id = user._id as ObjectId
@@ -43,7 +52,11 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   return res.json(result)
 }
 
-export const emailVerifyValidator = async (req: Request, res: Response, next: NextFunction) => {
+export const emailVerifyController = async (
+  req: Request<ParamsDictionary, any, EmailVerifyTokenRequestBody>,
+  res: Response,
+  next: NextFunction
+) => {
   const { user_id } = req.decoded_email_verify_token as TokenPayLoad
   const user = await databaseServices.users.findOne({
     _id: new ObjectId(user_id)
@@ -66,4 +79,31 @@ export const emailVerifyValidator = async (req: Request, res: Response, next: Ne
     message: USER_MESSAGES.EMAIL_VERIFY_SUCCESS,
     result
   })
+}
+
+export const resendVerifyEmailController = async (req: Request, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayLoad
+
+  const user = await databaseServices.users.findOne({ _id: new ObjectId(user_id) })
+  if (!user) {
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: USER_MESSAGES.USER_NOT_FOUND
+    })
+  }
+  if (user.verify === UserVerifyStatus.Verified) {
+    return res.json({
+      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED_BEFORE
+    })
+  }
+  const result = await userServices.resendVerifyEmail(user_id)
+  return res.json(result)
+}
+
+export const forgotPasswordController = async (
+  req: Request<ParamsDictionary, any, ForgotPasswordRequestBody>,
+  res: Response
+) => {
+  const { _id } = req.user as User
+  const result = await userServices.forgotPassword((_id as ObjectId).toString())
+  return res.json(result)
 }

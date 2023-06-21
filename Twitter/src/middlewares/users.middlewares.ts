@@ -170,9 +170,7 @@ export const accessTokenValidator = validate(
       Authorization: {
         custom: {
           options: async (value: string, { req }) => {
-
-            const access_token = value.split(' ')[1]
-
+            const access_token = (value || '').split(' ')[1]
 
             if (!access_token)
               throw new ErrorWithStatus({
@@ -276,4 +274,27 @@ export const emailVerifyTokenValidator = validate(
     },
     ['body']
   )
+)
+
+export const forgotPasswordValidator = validate(
+  checkSchema({
+    email: {
+      isEmail: {
+        errorMessage: USER_MESSAGES.EMAIL_IN_VALID
+      },
+      trim: true,
+      custom: {
+        options: async (value: string, { req }) => {
+          const user = await databaseServices.users.findOne({
+            email: value
+          })
+          if (user === null) {
+            throw new Error(USER_MESSAGES.USER_NOT_FOUND)
+          }
+          req.user = user
+          return true
+        }
+      }
+    }
+  })
 )
