@@ -5,7 +5,8 @@ import {
   loginController,
   logoutController,
   registerController,
-  resendVerifyEmailController
+  resendVerifyEmailController,
+  verifyForgotPasswordController
 } from '~/controllers/users.controller'
 import {
   accessTokenValidator,
@@ -13,7 +14,8 @@ import {
   forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
-  registerValidator
+  registerValidator,
+  verifyForgotPasswordTokenValidator
 } from '~/middlewares/users.middlewares'
 import { wrapAsync } from '~/utils/handlers'
 
@@ -26,5 +28,10 @@ usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsy
 usersRouter.post('/verify-email', emailVerifyTokenValidator, wrapAsync(emailVerifyController))
 usersRouter.post('/resend-verify-email', accessTokenValidator, wrapAsync(resendVerifyEmailController))
 usersRouter.post('/forgot-password', forgotPasswordValidator, wrapAsync(forgotPasswordController))
+usersRouter.post(
+  '/verify-forgot-password',
+  verifyForgotPasswordTokenValidator,
+  wrapAsync(verifyForgotPasswordController)
+)
 
 export default usersRouter
