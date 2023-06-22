@@ -23,7 +23,7 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginR
   const user = req.user as User
 
   const user_id = user._id as ObjectId
-  const result = await userServices.Login(user_id.toString())
+  const result = await userServices.Login({ user_id: user_id.toString(), verify: user.verify })
   return res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
@@ -105,8 +105,8 @@ export const forgotPasswordController = async (
   req: Request<ParamsDictionary, any, ForgotPasswordRequestBody>,
   res: Response
 ) => {
-  const { _id } = req.user as User
-  const result = await userServices.forgotPassword((_id as ObjectId).toString())
+  const { _id, verify } = req.user as User
+  const result = await userServices.forgotPassword({ user_id: (_id as ObjectId).toString(), verify: verify })
   return res.json(result)
 }
 export const verifyForgotPasswordController = async (
@@ -127,4 +127,17 @@ export const resetPasswordController = async (
   const { password } = req.body
   const result = await userServices.resetPassword(user_id, password)
   return res.json(result)
+}
+
+export const getMeController = async (req: Request, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayLoad
+  const user = await userServices.getMe(user_id)
+  return res.json({
+    message: 'Get me successfully!',
+    result: user
+  })
+}
+
+export const updateMeController = async (req: Request, res: Response) => {
+  return res.json({})
 }

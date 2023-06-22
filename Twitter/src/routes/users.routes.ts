@@ -2,11 +2,13 @@ import { Router } from 'express'
 import {
   emailVerifyController,
   forgotPasswordController,
+  getMeController,
   loginController,
   logoutController,
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
+  updateMeController,
   verifyForgotPasswordController
 } from '~/controllers/users.controller'
 import {
@@ -17,6 +19,7 @@ import {
   refreshTokenValidator,
   registerValidator,
   resetPasswordValidator,
+  verifiedUserValidator,
   verifyForgotPasswordTokenValidator
 } from '~/middlewares/users.middlewares'
 import { wrapAsync } from '~/utils/handlers'
@@ -36,5 +39,7 @@ usersRouter.post(
   wrapAsync(verifyForgotPasswordController)
 )
 usersRouter.post('/reset-password', resetPasswordValidator, wrapAsync(resetPasswordController))
+usersRouter.get('/me', accessTokenValidator, wrapAsync(getMeController))
+usersRouter.patch('/me', accessTokenValidator, verifiedUserValidator, wrapAsync(updateMeController))
 
 export default usersRouter
