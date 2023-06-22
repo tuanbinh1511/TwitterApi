@@ -13,6 +13,7 @@ import {
   RegisterRequestBody,
   ResetPasswordRequestBody,
   TokenPayLoad,
+  UpdateMeRequestBody,
   VerifyForgotPasswordRequestBody
 } from '~/models/requests/User.request'
 import User from '~/models/schema/User.schema'
@@ -138,6 +139,13 @@ export const getMeController = async (req: Request, res: Response) => {
   })
 }
 
-export const updateMeController = async (req: Request, res: Response) => {
-  return res.json({})
+export const updateMeController = async (req: Request<ParamsDictionary, any, UpdateMeRequestBody>, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayLoad
+  const { body } = req
+  const user = await userServices.updateMe(user_id, body)
+
+  return res.json({
+    message: USER_MESSAGES.UPDATE_ME_SUCCESS,
+    result: user
+  })
 }
