@@ -47,3 +47,9 @@ export interface UpdateMeRequestBody {
   avatar?: string
   cover_photo?: string
 }
+export interface followRequestBody {
+  followed_user_id: string
+}
+export interface GetProfileReqParams {
+  username: string
+}

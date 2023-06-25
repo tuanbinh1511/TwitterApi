@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { result } from 'lodash'
+import { pick, result } from 'lodash'
 import { ObjectId } from 'mongodb'
 import { UserVerifyStatus } from '~/constants/enums'
 import httpStatus from '~/constants/httpStatus'
@@ -8,13 +8,15 @@ import { USER_MESSAGES } from '~/constants/messages'
 import {
   EmailVerifyTokenRequestBody,
   ForgotPasswordRequestBody,
+  GetProfileReqParams,
   LoginRequestBody,
   LogoutRequestBody,
   RegisterRequestBody,
   ResetPasswordRequestBody,
   TokenPayLoad,
   UpdateMeRequestBody,
-  VerifyForgotPasswordRequestBody
+  VerifyForgotPasswordRequestBody,
+  followRequestBody
 } from '~/models/requests/User.request'
 import User from '~/models/schema/User.schema'
 import databaseServices from '~/services/database.services'
@@ -141,11 +143,30 @@ export const getMeController = async (req: Request, res: Response) => {
 
 export const updateMeController = async (req: Request<ParamsDictionary, any, UpdateMeRequestBody>, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayLoad
-  const { body } = req
+  const body = req.body
   const user = await userServices.updateMe(user_id, body)
 
   return res.json({
     message: USER_MESSAGES.UPDATE_ME_SUCCESS,
     result: user
   })
+}
+
+export const getProfileController = async (req: Request<GetProfileReqParams>, res: Response, next: NextFunction) => {
+  const { username } = req.params
+  const user = await userServices.getProfile(username)
+  return res.json({
+    message: 'Get profile successfully',
+    result: user
+  })
+}
+export const followController = async (
+  req: Request<ParamsDictionary, any, followRequestBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayLoad
+  const { followed_user_id } = req.body
+  const result = await userServices.follow(user_id, followed_user_id)
+  return res.json(result)
 }

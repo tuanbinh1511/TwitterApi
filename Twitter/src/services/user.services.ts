@@ -8,6 +8,9 @@ import RefreshToken from '~/models/schema/RefreshToken.schema'
 import { ObjectId } from 'mongodb'
 import { config } from 'dotenv'
 import { USER_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Errors'
+import httpStatus from '~/constants/httpStatus'
+import Followers from '~/models/schema/Followers.schema'
 
 config()
 
@@ -78,6 +81,7 @@ class UserServices {
         ...payload,
         _id: user_id,
         email_verify_token,
+        username: `user${user_id.toString()}`,
         date_of_birth: new Date(payload.date_of_birth),
         password: hashPassword(payload.password)
       })
@@ -227,6 +231,51 @@ class UserServices {
     )
 
     return user.value
+  }
+
+  async getProfile(username: string) {
+    try {
+      const user = await databaseServices.users.findOne(
+        { username },
+        {
+          projection: {
+            password: 0,
+            forgot_password_token: 0,
+            email_verify_token: 0,
+            verify: 0,
+            created_at: 0,
+            updated_at: 0
+          }
+        }
+      )
+      return user
+    } catch (error) {
+      throw new ErrorWithStatus({
+        message: 'User not found',
+        status: httpStatus.NOT_FOUND
+      })
+    }
+  }
+
+  async follow(user_id: string, followed_user_id: string) {
+    const follower = await databaseServices.follower.findOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    if (follower === null) {
+      await databaseServices.follower.insertOne(
+        new Followers({
+          user_id: new ObjectId(user_id),
+          followed_user_id: new ObjectId(followed_user_id)
+        })
+      )
+      return {
+        message: USER_MESSAGES.FOLLOW_SUCCESS
+      }
+    }
+    return {
+      message: 'Followed'
+    }
   }
 }
 const userServices = new UserServices()
