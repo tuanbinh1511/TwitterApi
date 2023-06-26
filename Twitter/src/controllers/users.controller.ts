@@ -16,7 +16,9 @@ import {
   TokenPayLoad,
   UpdateMeRequestBody,
   VerifyForgotPasswordRequestBody,
-  followRequestBody
+  changePasswordReqBody,
+  followRequestBody,
+  unFollowRequestParams
 } from '~/models/requests/User.request'
 import User from '~/models/schema/User.schema'
 import databaseServices from '~/services/database.services'
@@ -168,5 +170,21 @@ export const followController = async (
   const { user_id } = req.decoded_authorization as TokenPayLoad
   const { followed_user_id } = req.body
   const result = await userServices.follow(user_id, followed_user_id)
+  return res.json(result)
+}
+export const unFollowController = async (req: Request<unFollowRequestParams>, res: Response, next: NextFunction) => {
+  const { user_id } = req.decoded_authorization as TokenPayLoad
+  const { user_id: follow_user_id } = req.params
+  const result = await userServices.unFollow(user_id, follow_user_id)
+  return res.json(result)
+}
+export const changePasswordController = async (
+  req: Request<ParamsDictionary, any, changePasswordReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayLoad
+  const { password } = req.body
+  const result = await userServices.changePassword(user_id, password)
   return res.json(result)
 }
