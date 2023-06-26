@@ -7,6 +7,7 @@ import { ObjectId } from 'mongodb'
 import { UserVerifyStatus } from '~/constants/enums'
 import httpStatus from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
+import { REGEX_USERNAME } from '~/constants/regex'
 import { ErrorWithStatus } from '~/models/Errors'
 import { TokenPayLoad } from '~/models/requests/User.request'
 import databaseServices from '~/services/database.services'
@@ -158,6 +159,27 @@ const imageSchema: ParamSchema = {
       max: 200
     },
     errorMessage: USER_MESSAGES.IMAGE_URL_LENGTH
+  }
+}
+const userIdSchema: ParamSchema = {
+  custom: {
+    options: async (value, { req }) => {
+      if (!ObjectId.isValid(value)) {
+        throw new ErrorWithStatus({
+          message: 'Invalid user_id',
+          status: httpStatus.NOT_FOUND
+        })
+      }
+      const followed_user = await databaseServices.users.findOne({
+        _id: new ObjectId(value)
+      })
+      if (followed_user === null) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGES.USER_NOT_FOUND,
+          status: httpStatus.NOT_FOUND
+        })
+      }
+    }
   }
 }
 export const loginValidator = validate(
@@ -456,12 +478,18 @@ export const updateMeValidator = validate(
         },
         trim: true,
 
-        isLength: {
-          options: {
-            min: 1,
-            max: 50
-          },
-          errorMessage: USER_MESSAGES.USERNAME_LENGTH
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!REGEX_USERNAME.test(value)) {
+              throw Error(USER_MESSAGES.USERNAME_INVALID)
+            }
+            const user = await databaseServices.users.findOne({ username: value })
+            // Nếu đã tồn tại username này trong db
+            // thì chúng ta không cho phép update
+            if (user) {
+              throw Error(USER_MESSAGES.USERNAME_EXISTED)
+            }
+          }
         }
       },
       avatar: imageSchema,
@@ -472,27 +500,52 @@ export const updateMeValidator = validate(
 )
 
 export const followValidator = validate(
-  checkSchema({
-    followed_user_id: {
-      custom: {
-        options: async (value, { req }) => {
-          if (!ObjectId.isValid(value)) {
-            throw new ErrorWithStatus({
-              message: 'Invalid user_id',
-              status: httpStatus.NOT_FOUND
-            })
-          }
-          const followed_user = await databaseServices.users.findOne({
-            _id: new ObjectId(value)
-          })
-          if (followed_user === null) {
-            throw new ErrorWithStatus({
-              message: USER_MESSAGES.USER_NOT_FOUND,
-              status: httpStatus.NOT_FOUND
-            })
+  checkSchema(
+    {
+      followed_user_id: userIdSchema
+    },
+    ['body']
+  )
+)
+
+export const unFollowValidator = validate(
+  checkSchema(
+    {
+      user_id: userIdSchema
+    },
+    ['params']
+  )
+)
+
+export const changePasswordValidator = validate(
+  checkSchema(
+    {
+      old_password: {
+        ...passwordSchema,
+        custom: {
+          options: async (value, { req }) => {
+            const { user_id } = (req as Request).decoded_authorization as TokenPayLoad
+            const user = await databaseServices.users.findOne({ _id: new ObjectId(user_id) })
+            if (!user) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.USER_NOT_FOUND,
+                status: httpStatus.NOT_FOUND
+              })
+            }
+            const { password } = user
+            const isMatch = password === hashPassword(value)
+            if (!isMatch) {
+              throw new ErrorWithStatus({
+                message: 'Mật khẩu hiện tại không khớp!',
+                status: httpStatus.UNAUTHORIZED
+              })
+            }
           }
         }
-      }
-    }
-  })
+      },
+      password: passwordSchema,
+      confirm_password: confirm_passwordSchema
+    },
+    ['body']
+  )
 )

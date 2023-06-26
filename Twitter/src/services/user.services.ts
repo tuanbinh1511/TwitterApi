@@ -277,6 +277,40 @@ class UserServices {
       message: 'Followed'
     }
   }
+  async unFollow(user_id: string, followed_user_id: string) {
+    const follower = await databaseServices.follower.findOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    if (follower === null) {
+      return {
+        message: 'Already followed!'
+      }
+    }
+    await databaseServices.follower.deleteOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    return {
+      message: 'UnFollow Success!'
+    }
+  }
+  async changePassword(user_id: string, new_password: string) {
+    const user = await databaseServices.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          password: hashPassword(new_password)
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+    return {
+      message: 'Change password successfully!'
+    }
+  }
 }
 const userServices = new UserServices()
 export default userServices
