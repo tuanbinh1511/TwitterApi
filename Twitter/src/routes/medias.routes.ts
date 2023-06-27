@@ -3,6 +3,6 @@ import { uploadSingleImageController } from '~/controllers/medias.controller'
 import { wrapAsync } from '~/utils/handlers'
 const mediasRouter = Router()
 
-mediasRouter.post('/upload-image', uploadSingleImageController)
+mediasRouter.post('/upload-image', wrapAsync(uploadSingleImageController))
 
 export default mediasRouter
