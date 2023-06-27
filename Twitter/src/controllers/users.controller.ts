@@ -1,6 +1,6 @@
+import { config } from 'dotenv'
 import { NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { pick, result } from 'lodash'
 import { ObjectId } from 'mongodb'
 import { UserVerifyStatus } from '~/constants/enums'
 import httpStatus from '~/constants/httpStatus'
@@ -24,6 +24,8 @@ import User from '~/models/schema/User.schema'
 import databaseServices from '~/services/database.services'
 import userServices from '~/services/user.services'
 
+config()
+
 export const loginController = async (req: Request<ParamsDictionary, any, LoginRequestBody>, res: Response) => {
   const user = req.user as User
 
@@ -33,6 +35,13 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginR
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
   })
+}
+export const oauthController = async (req: Request, res: Response) => {
+  const { code } = req.query
+  const result = await userServices.oauth(code as string)
+
+  const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK}?access_token=${result.access_token}&refresh_token=${result.refresh_token}&new_user=${result.newUser}}`
+  return res.redirect(urlRedirect)
 }
 export const registerController = async (
   req: Request<ParamsDictionary, any, RegisterRequestBody>,

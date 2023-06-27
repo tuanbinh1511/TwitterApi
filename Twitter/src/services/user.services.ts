@@ -11,6 +11,7 @@ import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
 import httpStatus from '~/constants/httpStatus'
 import Followers from '~/models/schema/Followers.schema'
+import axios from 'axios'
 
 config()
 
@@ -106,7 +107,9 @@ class UserServices {
   }
   async Login({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     const [access_token, refresh_token] = await this.SignAccessAndRefreshToken({ user_id: user_id.toString(), verify })
-    await databaseServices.refreshToken.insertOne(new RefreshToken({ user_id: new ObjectId(), token: refresh_token }))
+    await databaseServices.refreshToken.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
+    )
 
     return {
       access_token,
@@ -136,6 +139,9 @@ class UserServices {
       )
     ])
     const [access_token, refresh_token] = token
+    await databaseServices.refreshToken.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
+    )
     return {
       access_token,
       refresh_token
@@ -309,6 +315,81 @@ class UserServices {
     )
     return {
       message: 'Change password successfully!'
+    }
+  }
+  private async getOauthGoogleToken(code: string) {
+    const body = {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    }
+    const { data } = await axios.post('https://oauth2.googleapis.com/token', body, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    return data
+  }
+  private async getGoogleUserInfo(access_token: string, id_token: string) {
+    const { data } = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
+      params: {
+        access_token,
+        alt: 'json'
+      },
+      headers: {
+        Authorization: `Bearer ${id_token}`
+      }
+    })
+    return data as {
+      id: string
+      email: string
+      verified_email: boolean
+      name: string
+      given_name: string
+      family_name: string
+      picture: string
+      locale: string
+    }
+  }
+  async oauth(code: string) {
+    const { access_token, id_token } = await this.getOauthGoogleToken(code)
+    const userInfo = await this.getGoogleUserInfo(access_token, id_token)
+    console.log(userInfo)
+    if (!userInfo.verified_email) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.GMAIL_NOT_VERIFIED,
+        status: httpStatus.FORBIDDEN
+      })
+    }
+    const user = await databaseServices.users.findOne({ email: userInfo.email })
+    if (user) {
+      const [access_token, refresh_token] = await this.SignAccessAndRefreshToken({
+        user_id: user._id.toString(),
+        verify: user.verify
+      })
+      await databaseServices.refreshToken.insertOne(
+        new RefreshToken({ user_id: new ObjectId(user._id), token: refresh_token })
+      )
+      return {
+        access_token,
+        refresh_token,
+        newUser: 0,
+        verify: user.verify
+      }
+    } else {
+      // random string password
+      const password = Math.random().toString(36).substring(2, 15)
+      // không thì đăng ký
+      const data = await this.register({
+        email: userInfo.email,
+        name: userInfo.name,
+        date_of_birth: new Date().toISOString(),
+        password,
+        confirm_password: password
+      })
+      return { ...data, newUser: 1, verify: UserVerifyStatus.Unverified }
     }
   }
 }
