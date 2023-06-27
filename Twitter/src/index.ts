@@ -3,6 +3,9 @@ import usersRouter from './routes/users.routes'
 import databaseServices from './services/database.services'
 import { defaultErrorHandler } from './middlewares/errors.middlewares'
 import mediasRouter from './routes/medias.routes'
+import { initFolder } from './utils/file'
+
+initFolder()
 
 const app = express()
 const port = 4000
