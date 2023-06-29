@@ -3,10 +3,8 @@ import path from 'path'
 import { uploadFolderPath } from '~/constants/dir'
 import mediaService from '~/services/media.services'
 
-import { handleUploadSingleImage } from '~/utils/file'
-
 export const uploadSingleImageController = async (req: Request, res: Response, next: NextFunction) => {
-  const result = await mediaService.handleUploadSingleImage(req)
+  const result = await mediaService.uploadImage(req)
   return res.json({
     messageL: 'Upload successfully',
     result
