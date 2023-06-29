@@ -5,6 +5,8 @@ import { defaultErrorHandler } from './middlewares/errors.middlewares'
 import mediasRouter from './routes/medias.routes'
 import { initFolder } from './utils/file'
 import { config } from 'dotenv'
+import { uploadFolderPath } from './constants/dir'
+import staticRoutes from './routes/static.routes'
 
 config()
 
@@ -18,6 +20,9 @@ databaseServices.connect()
 app.use(express.json())
 app.use('/users', usersRouter)
 app.use('/medias', mediasRouter)
+
+app.use('/static', staticRoutes)
+
 app.use(defaultErrorHandler)
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
