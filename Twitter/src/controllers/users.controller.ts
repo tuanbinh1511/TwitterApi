@@ -11,6 +11,7 @@ import {
   GetProfileReqParams,
   LoginRequestBody,
   LogoutRequestBody,
+  RefreshRequestBody,
   RegisterRequestBody,
   ResetPasswordRequestBody,
   TokenPayLoad,
@@ -96,7 +97,18 @@ export const emailVerifyController = async (
     result
   })
 }
-
+export const refreshTokenController = async (
+  req: Request<ParamsDictionary, any, RefreshRequestBody>,
+  res: Response
+) => {
+  const { refresh_token } = req.body
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayLoad
+  const result = await userServices.refreshToken({ user_id, verify, refresh_token })
+  return res.json({
+    message: 'Refresh token successfully',
+    result
+  })
+}
 export const resendVerifyEmailController = async (req: Request, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayLoad
 

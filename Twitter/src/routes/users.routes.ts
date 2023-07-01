@@ -9,6 +9,7 @@ import {
   loginController,
   logoutController,
   oauthController,
+  refreshTokenController,
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
@@ -44,6 +45,8 @@ usersRouter.post('/register', registerValidator, wrapAsync(registerController))
 usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
 usersRouter.post('/verify-email', emailVerifyTokenValidator, wrapAsync(emailVerifyController))
 usersRouter.post('/resend-verify-email', accessTokenValidator, wrapAsync(resendVerifyEmailController))
+usersRouter.post('/refresh-token', refreshTokenValidator, wrapAsync(refreshTokenController))
+
 usersRouter.post('/forgot-password', forgotPasswordValidator, wrapAsync(forgotPasswordController))
 usersRouter.post(
   '/verify-forgot-password',
